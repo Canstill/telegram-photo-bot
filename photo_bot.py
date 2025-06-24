@@ -1,12 +1,15 @@
+import os  # Добавили библиотеку для работы с операционной системой
 import asyncio
 import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.error import TelegramError
 
-# --- ВАШИ ДАННЫЕ (как и в прошлый раз) ---
-BOT_TOKEN = '7693222286:AAEYgYzbn_Jiwxmc1kUSoqzaq7auRru1No8'
-ADMIN_CHAT_ID = 5642066382 # Ваш Chat ID
+# --- ПОЛУЧАЕМ ДАННЫЕ ИЗ ПЕРЕМЕННЫХ ОКРУЖЕНИЯ ---
+# Теперь секретные данные не хранятся в коде.
+# Railway (или другой хостинг) передаст их боту при запуске.
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+ADMIN_CHAT_ID = os.environ.get('ADMIN_CHAT_ID')
 
 # --- Настройка логирования, чтобы видеть ошибки в консоли ---
 logging.basicConfig(
@@ -60,11 +63,15 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Главная функция для запуска бота
 def main():
+    # Проверка, что переменные окружения были загружены
+    if not BOT_TOKEN or not ADMIN_CHAT_ID:
+        logger.error("Ошибка: BOT_TOKEN или ADMIN_CHAT_ID не найдены в переменных окружения!")
+        return
+
     print("Бот запускается...")
     application = Application.builder().token(BOT_TOKEN).build()
 
-    # ИСПРАВЛЕННАЯ СТРОКА: Фильтры для всех типов медиафайлов
-    # Названия фильтров теперь с заглавной буквы
+    # Фильтры для всех типов медиафайлов
     media_filters = (
         filters.PHOTO | filters.VIDEO | filters.AUDIO | 
         filters.Document.ALL | filters.VOICE | filters.VIDEO_NOTE
